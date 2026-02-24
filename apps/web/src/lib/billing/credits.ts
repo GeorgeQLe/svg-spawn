@@ -4,13 +4,13 @@ import { getEnvConfig } from '@/lib/env';
 /**
  * Check whether a workspace has credits remaining.
  */
-export function checkCredits(workspaceId: string): { hasCredits: boolean; remaining: number } {
-  let remaining = getCredits(workspaceId);
+export async function checkCredits(workspaceId: string): Promise<{ hasCredits: boolean; remaining: number }> {
+  let remaining = await getCredits(workspaceId);
 
   // Auto-initialize credits for new workspaces
   if (remaining === undefined) {
     const { maxCreditsFree } = getEnvConfig();
-    initCredits(workspaceId, maxCreditsFree);
+    await initCredits(workspaceId, maxCreditsFree);
     remaining = maxCreditsFree;
   }
 
@@ -24,13 +24,13 @@ export function checkCredits(workspaceId: string): { hasCredits: boolean; remain
  * Consume a single credit from a workspace.
  * Returns false if the workspace has no credits remaining.
  */
-export function consumeCredit(workspaceId: string): boolean {
-  const remaining = getCredits(workspaceId);
+export async function consumeCredit(workspaceId: string): Promise<boolean> {
+  const remaining = await getCredits(workspaceId);
 
   // Auto-initialize if needed
   if (remaining === undefined) {
     const { maxCreditsFree } = getEnvConfig();
-    initCredits(workspaceId, maxCreditsFree);
+    await initCredits(workspaceId, maxCreditsFree);
   }
 
   return decrementCredits(workspaceId);

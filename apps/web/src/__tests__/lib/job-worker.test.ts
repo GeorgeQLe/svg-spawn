@@ -151,7 +151,7 @@ function makeAnimationPlan(): AnimationPlan {
   };
 }
 
-function setupTestData() {
+async function setupTestData() {
   const now = new Date().toISOString();
 
   const project: StoredProject = {
@@ -164,9 +164,9 @@ function setupTestData() {
     processedSvgDocumentId: 'proj-1',
     pipelineResult: makePipelineResult(),
   };
-  createProject(project);
+  await createProject(project);
 
-  createNode({
+  await createNode({
     id: 'node-1',
     projectId: 'proj-1',
     prompt: 'Make it bounce',
@@ -174,7 +174,7 @@ function setupTestData() {
     createdAt: now,
   });
 
-  createJob({
+  await createJob({
     id: 'job-1',
     nodeId: 'node-1',
     status: 'queued',
@@ -183,38 +183,38 @@ function setupTestData() {
     updatedAt: now,
   });
 
-  initCredits('ws-1', 10);
+  await initCredits('ws-1', 10);
 }
 
 describe('job-worker', () => {
-  beforeEach(() => {
-    resetStore();
+  beforeEach(async () => {
+    await resetStore();
     vi.clearAllMocks();
   });
 
   it('should complete successfully: job completes, node updated, credit consumed', async () => {
-    setupTestData();
+    await setupTestData();
 
     mockGenerateAnimationPlan.mockResolvedValue(ok(makeAnimationPlan()));
     mockCompile.mockReturnValue(ok('<svg animated/>'));
 
     await processGenerationJob('job-1');
 
-    const job = getJob('job-1');
+    const job = await getJob('job-1');
     expect(job!.status).toBe('completed');
     expect(job!.progress).toBe(100);
     expect(job!.result).toBe('<svg animated/>');
 
-    const node = getNode('node-1');
+    const node = await getNode('node-1');
     expect(node!.status).toBe('completed');
     expect(node!.animatedSvg).toBe('<svg animated/>');
 
     // Credit was consumed
-    expect(getCredits('ws-1')).toBe(9);
+    expect(await getCredits('ws-1')).toBe(9);
   });
 
   it('should fail on AI error: job fails, no credit consumed', async () => {
-    setupTestData();
+    await setupTestData();
 
     mockGenerateAnimationPlan.mockResolvedValue(
       err(new AiError('Model overloaded', 'rate_limit')),
@@ -222,20 +222,20 @@ describe('job-worker', () => {
 
     await processGenerationJob('job-1');
 
-    const job = getJob('job-1');
+    const job = await getJob('job-1');
     expect(job!.status).toBe('failed');
     expect(job!.error).toContain('AI generation failed');
 
-    const node = getNode('node-1');
+    const node = await getNode('node-1');
     expect(node!.status).toBe('failed');
     expect(node!.error).toContain('AI generation failed');
 
     // Credit was NOT consumed
-    expect(getCredits('ws-1')).toBe(10);
+    expect(await getCredits('ws-1')).toBe(10);
   });
 
   it('should fail on compile error: job fails, no credit consumed', async () => {
-    setupTestData();
+    await setupTestData();
 
     mockGenerateAnimationPlan.mockResolvedValue(ok(makeAnimationPlan()));
     mockCompile.mockReturnValue(
@@ -244,23 +244,23 @@ describe('job-worker', () => {
 
     await processGenerationJob('job-1');
 
-    const job = getJob('job-1');
+    const job = await getJob('job-1');
     expect(job!.status).toBe('failed');
     expect(job!.error).toContain('Compilation failed');
 
-    const node = getNode('node-1');
+    const node = await getNode('node-1');
     expect(node!.status).toBe('failed');
 
     // Credit was NOT consumed
-    expect(getCredits('ws-1')).toBe(10);
+    expect(await getCredits('ws-1')).toBe(10);
   });
 
   it('should fail gracefully when node is missing', async () => {
     const now = new Date().toISOString();
-    resetStore();
+    await resetStore();
 
     // Create job pointing to non-existent node
-    createJob({
+    await createJob({
       id: 'job-orphan',
       nodeId: 'nonexistent-node',
       status: 'queued',
@@ -271,17 +271,17 @@ describe('job-worker', () => {
 
     await processGenerationJob('job-orphan');
 
-    const job = getJob('job-orphan');
+    const job = await getJob('job-orphan');
     expect(job!.status).toBe('failed');
     expect(job!.error).toContain('node not found');
   });
 
   it('should fail gracefully when project is missing', async () => {
     const now = new Date().toISOString();
-    resetStore();
+    await resetStore();
 
     // Create node pointing to non-existent project
-    createNode({
+    await createNode({
       id: 'node-orphan',
       projectId: 'nonexistent-project',
       prompt: 'test',
@@ -289,7 +289,7 @@ describe('job-worker', () => {
       createdAt: now,
     });
 
-    createJob({
+    await createJob({
       id: 'job-no-project',
       nodeId: 'node-orphan',
       status: 'queued',
@@ -300,11 +300,11 @@ describe('job-worker', () => {
 
     await processGenerationJob('job-no-project');
 
-    const job = getJob('job-no-project');
+    const job = await getJob('job-no-project');
     expect(job!.status).toBe('failed');
     expect(job!.error).toContain('Project not found');
 
-    const node = getNode('node-orphan');
+    const node = await getNode('node-orphan');
     expect(node!.status).toBe('failed');
     expect(node!.error).toContain('Project not found');
   });

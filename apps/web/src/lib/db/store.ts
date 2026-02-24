@@ -1,118 +1,86 @@
 import type { Project, GenerationNode, Job } from '@svg-spawn/core';
 import type { PipelineResult } from '@svg-spawn/svg-pipeline';
+import type { Store } from './store-interface';
+import { MemoryStore } from './memory-store';
 
 /**
- * Extended project stored in the in-memory DB.
+ * Extended project stored in the DB.
  * Includes the processed pipeline result alongside the core Project fields.
  */
 export interface StoredProject extends Project {
   pipelineResult?: PipelineResult;
 }
 
-/**
- * In-memory data store for MVP. Resets on server restart.
- */
-interface InMemoryStore {
-  projects: Map<string, StoredProject>;
-  nodes: Map<string, GenerationNode>;
-  jobs: Map<string, Job>;
-  credits: Map<string, number>; // workspaceId -> remaining credits
+function createStore(): Store {
+  if (process.env.DATABASE_URL) {
+    // Dynamic import to avoid loading postgres.js when not needed
+    const { PgStore } = require('./pg-store');
+    return new PgStore();
+  }
+  return new MemoryStore();
 }
 
-function createInMemoryStore(): InMemoryStore {
-  return {
-    projects: new Map(),
-    nodes: new Map(),
-    jobs: new Map(),
-    credits: new Map(),
-  };
-}
-
-/** Singleton in-memory database instance. */
-export const db = createInMemoryStore();
+const store: Store = createStore();
 
 // ── Project CRUD ──────────────────────────────────────────────────────────
 
-export function createProject(project: StoredProject): StoredProject {
-  db.projects.set(project.id, project);
-  return project;
+export function createProject(project: StoredProject): Promise<StoredProject> {
+  return store.createProject(project);
 }
 
-export function getProject(id: string): StoredProject | undefined {
-  return db.projects.get(id);
+export function getProject(id: string): Promise<StoredProject | undefined> {
+  return store.getProject(id);
 }
 
 // ── Node CRUD ─────────────────────────────────────────────────────────────
 
-export function createNode(node: GenerationNode): GenerationNode {
-  db.nodes.set(node.id, node);
-  return node;
+export function createNode(node: GenerationNode): Promise<GenerationNode> {
+  return store.createNode(node);
 }
 
-export function getNode(id: string): GenerationNode | undefined {
-  return db.nodes.get(id);
+export function getNode(id: string): Promise<GenerationNode | undefined> {
+  return store.getNode(id);
 }
 
-export function updateNode(id: string, updates: Partial<GenerationNode>): GenerationNode | undefined {
-  const existing = db.nodes.get(id);
-  if (!existing) return undefined;
-  const updated = { ...existing, ...updates };
-  db.nodes.set(id, updated);
-  return updated;
+export function updateNode(id: string, updates: Partial<GenerationNode>): Promise<GenerationNode | undefined> {
+  return store.updateNode(id, updates);
 }
 
-export function getNodesByProject(projectId: string): GenerationNode[] {
-  const result: GenerationNode[] = [];
-  for (const node of db.nodes.values()) {
-    if (node.projectId === projectId) {
-      result.push(node);
-    }
-  }
-  return result;
+export function getNodesByProject(projectId: string): Promise<GenerationNode[]> {
+  return store.getNodesByProject(projectId);
 }
 
 // ── Job CRUD ──────────────────────────────────────────────────────────────
 
-export function createJob(job: Job): Job {
-  db.jobs.set(job.id, job);
-  return job;
+export function createJob(job: Job): Promise<Job> {
+  return store.createJob(job);
 }
 
-export function getJob(id: string): Job | undefined {
-  return db.jobs.get(id);
+export function getJob(id: string): Promise<Job | undefined> {
+  return store.getJob(id);
 }
 
-export function updateJob(id: string, updates: Partial<Job>): Job | undefined {
-  const existing = db.jobs.get(id);
-  if (!existing) return undefined;
-  const updated = { ...existing, ...updates };
-  db.jobs.set(id, updated);
-  return updated;
+export function updateJob(id: string, updates: Partial<Job>): Promise<Job | undefined> {
+  return store.updateJob(id, updates);
 }
 
 // ── Credits CRUD ──────────────────────────────────────────────────────────
 
-export function initCredits(workspaceId: string, amount: number): void {
-  db.credits.set(workspaceId, amount);
+export function initCredits(workspaceId: string, amount: number): Promise<void> {
+  return store.initCredits(workspaceId, amount);
 }
 
-export function getCredits(workspaceId: string): number | undefined {
-  return db.credits.get(workspaceId);
+export function getCredits(workspaceId: string): Promise<number | undefined> {
+  return store.getCredits(workspaceId);
 }
 
-export function decrementCredits(workspaceId: string): boolean {
-  const current = db.credits.get(workspaceId);
-  if (current === undefined || current <= 0) return false;
-  db.credits.set(workspaceId, current - 1);
-  return true;
+export function decrementCredits(workspaceId: string): Promise<boolean> {
+  return store.decrementCredits(workspaceId);
 }
 
 /**
  * Reset the store. Primarily for testing.
  */
-export function resetStore(): void {
-  db.projects.clear();
-  db.nodes.clear();
-  db.jobs.clear();
-  db.credits.clear();
+export function resetStore(): Promise<void> {
+  return store.resetStore();
 }

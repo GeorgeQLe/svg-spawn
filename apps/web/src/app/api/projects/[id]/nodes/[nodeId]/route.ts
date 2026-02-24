@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     const { nodeId } = await params;
-    const node = getNode(nodeId);
+    const node = await getNode(nodeId);
 
     if (!node) {
       return NextResponse.json({ error: 'Node not found' }, { status: 404 });

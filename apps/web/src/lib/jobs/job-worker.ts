@@ -45,15 +45,15 @@ function getAiClient(): AiClient {
  * On failure: update node/job to 'failed', do NOT decrement credits.
  */
 export async function processGenerationJob(jobId: string): Promise<void> {
-  const job = getJob(jobId);
+  const job = await getJob(jobId);
   if (!job) {
     console.error(`[job-worker] Job not found: ${jobId}`);
     return;
   }
 
-  const node = getNode(job.nodeId);
+  const node = await getNode(job.nodeId);
   if (!node) {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       status: 'failed',
       error: 'Generation node not found',
       updatedAt: new Date().toISOString(),
@@ -61,14 +61,14 @@ export async function processGenerationJob(jobId: string): Promise<void> {
     return;
   }
 
-  const project = getProject(node.projectId);
+  const project = await getProject(node.projectId);
   if (!project) {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       status: 'failed',
       error: 'Project not found',
       updatedAt: new Date().toISOString(),
     });
-    updateNode(node.id, {
+    await updateNode(node.id, {
       status: 'failed',
       error: 'Project not found',
     });
@@ -76,12 +76,12 @@ export async function processGenerationJob(jobId: string): Promise<void> {
   }
 
   // Update to processing
-  updateJob(jobId, {
+  await updateJob(jobId, {
     status: 'processing',
     progress: 10,
     updatedAt: new Date().toISOString(),
   });
-  updateNode(node.id, { status: 'generating' });
+  await updateNode(node.id, { status: 'generating' });
 
   try {
     // Ensure we have a pipeline result
@@ -90,7 +90,7 @@ export async function processGenerationJob(jobId: string): Promise<void> {
       throw new Error('Project has no processed SVG data');
     }
 
-    updateJob(jobId, { progress: 30, updatedAt: new Date().toISOString() });
+    await updateJob(jobId, { progress: 30, updatedAt: new Date().toISOString() });
 
     // Collect valid node UIDs from the SVG document
     const validNodeUids = collectNodeUids(pipelineResult.document.root);
@@ -113,7 +113,7 @@ export async function processGenerationJob(jobId: string): Promise<void> {
       throw new Error(`AI generation failed: ${planResult.error.message}`);
     }
 
-    updateJob(jobId, { progress: 60, updatedAt: new Date().toISOString() });
+    await updateJob(jobId, { progress: 60, updatedAt: new Date().toISOString() });
 
     // Compile animation plan into animated SVG
     const compileResult = compile(planResult.value, pipelineResult.document);
@@ -121,16 +121,16 @@ export async function processGenerationJob(jobId: string): Promise<void> {
       throw new Error(`Compilation failed: ${compileResult.error.message}`);
     }
 
-    updateJob(jobId, { progress: 90, updatedAt: new Date().toISOString() });
+    await updateJob(jobId, { progress: 90, updatedAt: new Date().toISOString() });
 
     // Update node with result
-    updateNode(node.id, {
+    await updateNode(node.id, {
       status: 'completed',
       animatedSvg: compileResult.value,
     });
 
     // Update job as completed
-    updateJob(jobId, {
+    await updateJob(jobId, {
       status: 'completed',
       progress: 100,
       result: compileResult.value,
@@ -138,16 +138,16 @@ export async function processGenerationJob(jobId: string): Promise<void> {
     });
 
     // Decrement credits only on success
-    consumeCredit(project.workspaceId);
+    await consumeCredit(project.workspaceId);
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-    updateNode(node.id, {
+    await updateNode(node.id, {
       status: 'failed',
       error: errorMessage,
     });
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       status: 'failed',
       error: errorMessage,
       updatedAt: new Date().toISOString(),

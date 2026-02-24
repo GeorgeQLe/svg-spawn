@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       pipelineResult: result.data,
     };
 
-    createProject(project);
+    await createProject(project);
 
     const processedSvg = serializeSvg(result.data.document.root);
 

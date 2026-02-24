@@ -14,12 +14,12 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const project = getProject(id);
+    const project = await getProject(id);
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    const nodes = getNodesByProject(id);
+    const nodes = await getNodesByProject(id);
     return NextResponse.json({ nodes });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
@@ -40,7 +40,7 @@ export async function POST(
 ) {
   try {
     const { id: projectId } = await params;
-    const project = getProject(projectId);
+    const project = await getProject(projectId);
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
@@ -53,7 +53,7 @@ export async function POST(
     }
 
     // Check credits
-    const creditStatus = checkCredits(project.workspaceId);
+    const creditStatus = await checkCredits(project.workspaceId);
     if (!creditStatus.hasCredits) {
       return NextResponse.json(
         { error: 'No credits remaining', remaining: 0 },
@@ -66,7 +66,7 @@ export async function POST(
     const jobId = uuidv4();
 
     // Create generation node
-    createNode({
+    await createNode({
       id: nodeId,
       projectId,
       parentNodeId,
@@ -76,7 +76,7 @@ export async function POST(
     });
 
     // Create job
-    createJob({
+    await createJob({
       id: jobId,
       nodeId,
       status: 'queued',

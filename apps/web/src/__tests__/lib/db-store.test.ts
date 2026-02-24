@@ -55,43 +55,43 @@ function makeJob(overrides: Partial<Job> = {}): Job {
 }
 
 describe('db-store', () => {
-  beforeEach(() => {
-    resetStore();
+  beforeEach(async () => {
+    await resetStore();
   });
 
-  it('should create and get a project', () => {
+  it('should create and get a project', async () => {
     const project = makeProject();
-    createProject(project);
+    await createProject(project);
 
-    const retrieved = getProject('proj-1');
+    const retrieved = await getProject('proj-1');
     expect(retrieved).toBeDefined();
     expect(retrieved!.id).toBe('proj-1');
     expect(retrieved!.name).toBe('Test Project');
     expect(retrieved!.originalSvg).toBe('<svg><rect/></svg>');
 
     // Non-existent project
-    expect(getProject('nonexistent')).toBeUndefined();
+    expect(await getProject('nonexistent')).toBeUndefined();
   });
 
-  it('should create and get a node', () => {
+  it('should create and get a node', async () => {
     const node = makeNode();
-    createNode(node);
+    await createNode(node);
 
-    const retrieved = getNode('node-1');
+    const retrieved = await getNode('node-1');
     expect(retrieved).toBeDefined();
     expect(retrieved!.id).toBe('node-1');
     expect(retrieved!.prompt).toBe('Bounce the circle');
     expect(retrieved!.status).toBe('pending');
 
     // Non-existent node
-    expect(getNode('nonexistent')).toBeUndefined();
+    expect(await getNode('nonexistent')).toBeUndefined();
   });
 
-  it('should update node status', () => {
+  it('should update node status', async () => {
     const node = makeNode();
-    createNode(node);
+    await createNode(node);
 
-    const updated = updateNode('node-1', {
+    const updated = await updateNode('node-1', {
       status: 'completed',
       animatedSvg: '<svg animated/>',
     });
@@ -102,40 +102,40 @@ describe('db-store', () => {
     expect(updated!.prompt).toBe('Bounce the circle');
 
     // Verify it persisted
-    const retrieved = getNode('node-1');
+    const retrieved = await getNode('node-1');
     expect(retrieved!.status).toBe('completed');
 
     // Update non-existent node returns undefined
-    expect(updateNode('nonexistent', { status: 'failed' })).toBeUndefined();
+    expect(await updateNode('nonexistent', { status: 'failed' })).toBeUndefined();
   });
 
-  it('should get nodes by project', () => {
-    createNode(makeNode({ id: 'node-1', projectId: 'proj-1', prompt: 'A' }));
-    createNode(makeNode({ id: 'node-2', projectId: 'proj-1', prompt: 'B' }));
-    createNode(makeNode({ id: 'node-3', projectId: 'proj-2', prompt: 'C' }));
+  it('should get nodes by project', async () => {
+    await createNode(makeNode({ id: 'node-1', projectId: 'proj-1', prompt: 'A' }));
+    await createNode(makeNode({ id: 'node-2', projectId: 'proj-1', prompt: 'B' }));
+    await createNode(makeNode({ id: 'node-3', projectId: 'proj-2', prompt: 'C' }));
 
-    const proj1Nodes = getNodesByProject('proj-1');
+    const proj1Nodes = await getNodesByProject('proj-1');
     expect(proj1Nodes).toHaveLength(2);
     expect(proj1Nodes.map((n) => n.prompt).sort()).toEqual(['A', 'B']);
 
-    const proj2Nodes = getNodesByProject('proj-2');
+    const proj2Nodes = await getNodesByProject('proj-2');
     expect(proj2Nodes).toHaveLength(1);
     expect(proj2Nodes[0].prompt).toBe('C');
 
     // Non-existent project returns empty
-    expect(getNodesByProject('nonexistent')).toHaveLength(0);
+    expect(await getNodesByProject('nonexistent')).toHaveLength(0);
   });
 
-  it('should create and update a job', () => {
+  it('should create and update a job', async () => {
     const job = makeJob();
-    createJob(job);
+    await createJob(job);
 
-    const retrieved = getJob('job-1');
+    const retrieved = await getJob('job-1');
     expect(retrieved).toBeDefined();
     expect(retrieved!.status).toBe('queued');
     expect(retrieved!.progress).toBe(0);
 
-    const updated = updateJob('job-1', {
+    const updated = await updateJob('job-1', {
       status: 'processing',
       progress: 50,
     });
@@ -144,36 +144,36 @@ describe('db-store', () => {
     expect(updated!.progress).toBe(50);
 
     // Verify it persisted
-    const retrieved2 = getJob('job-1');
+    const retrieved2 = await getJob('job-1');
     expect(retrieved2!.status).toBe('processing');
 
     // Non-existent job
-    expect(getJob('nonexistent')).toBeUndefined();
-    expect(updateJob('nonexistent', { status: 'failed' })).toBeUndefined();
+    expect(await getJob('nonexistent')).toBeUndefined();
+    expect(await updateJob('nonexistent', { status: 'failed' })).toBeUndefined();
   });
 
-  it('should handle credits CRUD', () => {
+  it('should handle credits CRUD', async () => {
     // Initially undefined
-    expect(getCredits('ws-1')).toBeUndefined();
+    expect(await getCredits('ws-1')).toBeUndefined();
 
     // Initialize
-    initCredits('ws-1', 10);
-    expect(getCredits('ws-1')).toBe(10);
+    await initCredits('ws-1', 10);
+    expect(await getCredits('ws-1')).toBe(10);
 
     // Decrement
-    expect(decrementCredits('ws-1')).toBe(true);
-    expect(getCredits('ws-1')).toBe(9);
+    expect(await decrementCredits('ws-1')).toBe(true);
+    expect(await getCredits('ws-1')).toBe(9);
 
     // Decrement to zero
-    initCredits('ws-2', 1);
-    expect(decrementCredits('ws-2')).toBe(true);
-    expect(getCredits('ws-2')).toBe(0);
+    await initCredits('ws-2', 1);
+    expect(await decrementCredits('ws-2')).toBe(true);
+    expect(await getCredits('ws-2')).toBe(0);
 
     // Cannot decrement past zero
-    expect(decrementCredits('ws-2')).toBe(false);
-    expect(getCredits('ws-2')).toBe(0);
+    expect(await decrementCredits('ws-2')).toBe(false);
+    expect(await getCredits('ws-2')).toBe(0);
 
     // Non-existent workspace
-    expect(decrementCredits('nonexistent')).toBe(false);
+    expect(await decrementCredits('nonexistent')).toBe(false);
   });
 });
