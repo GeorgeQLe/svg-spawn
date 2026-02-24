@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getJob } from '@/lib/db/store';
+import { requireSession } from '@/lib/auth';
 
 /**
  * GET /api/jobs/[id]
@@ -8,10 +9,13 @@ import { getJob } from '@/lib/db/store';
  * Returns: { id, status, progress, nodeId, error? }
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const sessionOrRes = await requireSession(request);
+    if (sessionOrRes instanceof NextResponse) return sessionOrRes;
+
     const { id } = await params;
     const job = await getJob(id);
 

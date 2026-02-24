@@ -7,6 +7,7 @@ export class MemoryStore implements Store {
   private nodes = new Map<string, GenerationNode>();
   private jobs = new Map<string, Job>();
   private credits = new Map<string, number>();
+  private workspaces = new Map<string, { id: string; ownerId: string; creditsRemaining: number }>();
 
   async createProject(project: StoredProject): Promise<StoredProject> {
     this.projects.set(project.id, project);
@@ -76,10 +77,25 @@ export class MemoryStore implements Store {
     return true;
   }
 
+  async getWorkspaceByOwnerId(ownerId: string): Promise<{ id: string; creditsRemaining: number } | undefined> {
+    for (const ws of this.workspaces.values()) {
+      if (ws.ownerId === ownerId) {
+        return { id: ws.id, creditsRemaining: ws.creditsRemaining };
+      }
+    }
+    return undefined;
+  }
+
+  async createWorkspace(ws: { id: string; ownerId: string; creditsRemaining: number }): Promise<void> {
+    this.workspaces.set(ws.id, ws);
+    this.credits.set(ws.id, ws.creditsRemaining);
+  }
+
   async resetStore(): Promise<void> {
     this.projects.clear();
     this.nodes.clear();
     this.jobs.clear();
     this.credits.clear();
+    this.workspaces.clear();
   }
 }

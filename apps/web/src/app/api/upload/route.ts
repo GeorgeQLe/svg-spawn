@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processUploadedSvg } from '@/lib/server/process-svg';
 import { serializeSvg } from '@svg-spawn/svg-pipeline';
+import { requireSession } from '@/lib/auth';
 
 /**
  * POST /api/upload
@@ -11,6 +12,9 @@ import { serializeSvg } from '@svg-spawn/svg-pipeline';
  */
 export async function POST(request: NextRequest) {
   try {
+    const sessionOrRes = await requireSession(request);
+    if (sessionOrRes instanceof NextResponse) return sessionOrRes;
+
     const formData = await request.formData();
     const file = formData.get('svg');
 

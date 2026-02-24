@@ -3,16 +3,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { getProject, getNodesByProject, createNode, createJob } from '@/lib/db/store';
 import { checkCredits } from '@/lib/billing/credits';
 import { jobQueue } from '@/lib/jobs/job-queue';
+import { requireSession } from '@/lib/auth';
 
 /**
  * GET /api/projects/[id]/nodes
  * Get all generation nodes for a project.
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const sessionOrRes = await requireSession(request);
+    if (sessionOrRes instanceof NextResponse) return sessionOrRes;
+
     const { id } = await params;
     const project = await getProject(id);
     if (!project) {
@@ -39,6 +43,9 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const sessionOrRes = await requireSession(request);
+    if (sessionOrRes instanceof NextResponse) return sessionOrRes;
+
     const { id: projectId } = await params;
     const project = await getProject(projectId);
     if (!project) {

@@ -7,6 +7,7 @@ import { NodeDetailPanel } from '@/components/node/node-detail-panel';
 import { ViewToggle } from '@/components/view-toggle';
 import { ToastProvider } from '@/components/toast/toast-provider';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { UserMenu } from '@/components/auth/user-menu';
 import { useProjectStore } from '@/store/project-store';
 
 export default function ProjectPage() {
@@ -84,7 +85,10 @@ export default function ProjectPage() {
               {/* Graph view header */}
               <header className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
                 <h1 className="text-lg font-semibold text-white">Generation Graph</h1>
-                <ViewToggle activeView={viewMode} onViewChange={setViewMode} />
+                <div className="flex items-center gap-4">
+                  <ViewToggle activeView={viewMode} onViewChange={setViewMode} />
+                  <UserMenu />
+                </div>
               </header>
 
               {/* Graph view content */}

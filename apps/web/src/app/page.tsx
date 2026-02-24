@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { Sparkles, ArrowRight } from 'lucide-react';
+import { UserMenu } from '@/components/auth/user-menu';
 
 export default function Home() {
   const router = useRouter();
@@ -14,6 +15,10 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
+      <div className="absolute top-4 right-4">
+        <UserMenu />
+      </div>
+
       <div className="flex flex-col items-center gap-4">
         <div className="flex items-center gap-3">
           <Sparkles className="h-10 w-10 text-indigo-400" />

@@ -78,6 +78,16 @@ export function decrementCredits(workspaceId: string): Promise<boolean> {
   return store.decrementCredits(workspaceId);
 }
 
+// ── Workspace CRUD ───────────────────────────────────────────────────────
+
+export function getWorkspaceByOwnerId(ownerId: string): Promise<{ id: string; creditsRemaining: number } | undefined> {
+  return store.getWorkspaceByOwnerId(ownerId);
+}
+
+export function createWorkspace(ws: { id: string; ownerId: string; creditsRemaining: number }): Promise<void> {
+  return store.createWorkspace(ws);
+}
+
 /**
  * Reset the store. Primarily for testing.
  */

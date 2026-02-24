@@ -18,5 +18,8 @@ export interface Store {
   getCredits(workspaceId: string): Promise<number | undefined>;
   decrementCredits(workspaceId: string): Promise<boolean>;
 
+  getWorkspaceByOwnerId(ownerId: string): Promise<{ id: string; creditsRemaining: number } | undefined>;
+  createWorkspace(ws: { id: string; ownerId: string; creditsRemaining: number }): Promise<void>;
+
   resetStore(): Promise<void>;
 }

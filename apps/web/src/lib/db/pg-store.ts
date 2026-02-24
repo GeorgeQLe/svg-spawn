@@ -157,6 +157,24 @@ export class PgStore implements Store {
     return rows.length > 0;
   }
 
+  async getWorkspaceByOwnerId(ownerId: string): Promise<{ id: string; creditsRemaining: number } | undefined> {
+    const rows = await this.db
+      .select({ id: workspaces.id, creditsRemaining: workspaces.creditsRemaining })
+      .from(workspaces)
+      .where(eq(workspaces.ownerId, ownerId))
+      .limit(1);
+    if (rows.length === 0) return undefined;
+    return rows[0];
+  }
+
+  async createWorkspace(ws: { id: string; ownerId: string; creditsRemaining: number }): Promise<void> {
+    await this.db.insert(workspaces).values({
+      id: ws.id,
+      ownerId: ws.ownerId,
+      creditsRemaining: ws.creditsRemaining,
+    });
+  }
+
   async resetStore(): Promise<void> {
     await this.db.delete(jobs);
     await this.db.delete(generationNodes);

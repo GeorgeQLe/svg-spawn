@@ -4,6 +4,8 @@ import { createProject } from '@/lib/db/store';
 import type { StoredProject } from '@/lib/db/store';
 import { processUploadedSvg } from '@/lib/server/process-svg';
 import { serializeSvg } from '@svg-spawn/svg-pipeline';
+import { requireSession } from '@/lib/auth';
+import { ensureWorkspace } from '@/lib/auth-workspace';
 
 /**
  * POST /api/projects
@@ -14,6 +16,10 @@ import { serializeSvg } from '@svg-spawn/svg-pipeline';
  */
 export async function POST(request: NextRequest) {
   try {
+    const sessionOrRes = await requireSession(request);
+    if (sessionOrRes instanceof NextResponse) return sessionOrRes;
+    const session = sessionOrRes;
+
     const body = await request.json();
     const { name, svg } = body as { name?: string; svg?: string };
 
@@ -32,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const now = new Date().toISOString();
     const projectId = uuidv4();
-    const workspaceId = 'default'; // MVP: single workspace
+    const workspaceId = await ensureWorkspace(session.user.id);
 
     const project: StoredProject = {
       id: projectId,

@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProject } from '@/lib/db/store';
 import { serializeSvg } from '@svg-spawn/svg-pipeline';
+import { requireSession } from '@/lib/auth';
 
 /**
  * GET /api/projects/[id]
  * Retrieve a project by ID.
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const sessionOrRes = await requireSession(request);
+    if (sessionOrRes instanceof NextResponse) return sessionOrRes;
+
     const { id } = await params;
     const project = await getProject(id);
 
