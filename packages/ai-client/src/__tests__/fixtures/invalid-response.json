@@ -1,0 +1,17 @@
+{
+  "id": "plan-1",
+  "svgDocumentId": "doc-1",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "Fade in circle",
+      "effectType": "fade",
+      "targets": []
+    }
+  ],
+  "channels": {},
+  "metadata": {
+    "generatedAt": "2026-01-01T00:00:00.000Z",
+    "modelId": "gemini-pro"
+  }
+}

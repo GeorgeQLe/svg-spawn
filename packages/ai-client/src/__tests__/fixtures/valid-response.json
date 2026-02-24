@@ -1,0 +1,42 @@
+{
+  "id": "plan-1",
+  "svgDocumentId": "doc-1",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "Fade in circle",
+      "effectType": "fade",
+      "targets": [
+        {
+          "type": "element",
+          "nodeUid": "node-1"
+        }
+      ],
+      "startTime": 0,
+      "duration": 1,
+      "easingPreset": "ease-in-out",
+      "repeatCount": 1
+    }
+  ],
+  "channels": {
+    "group-1": [
+      {
+        "property": "opacity",
+        "keyframes": [
+          { "offset": 0, "value": 0 },
+          { "offset": 1, "value": 1 }
+        ],
+        "duration": 1,
+        "delay": 0,
+        "repeatCount": 1,
+        "fill": "forwards",
+        "compilationBackend": "auto"
+      }
+    ]
+  },
+  "metadata": {
+    "generatedAt": "2026-01-01T00:00:00.000Z",
+    "modelId": "gemini-pro",
+    "userPrompt": "Fade in the circle"
+  }
+}

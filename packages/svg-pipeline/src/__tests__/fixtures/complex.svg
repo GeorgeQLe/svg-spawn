@@ -1,0 +1,56 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff0000"/>
+      <stop offset="100%" stop-color="#0000ff"/>
+    </linearGradient>
+    <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <filter id="blur1">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3"/>
+    </filter>
+    <clipPath id="clip1">
+      <circle cx="100" cy="100" r="50"/>
+    </clipPath>
+    <clipPath id="clip2">
+      <rect x="0" y="0" width="200" height="200"/>
+    </clipPath>
+  </defs>
+  <g transform="translate(10, 10)">
+    <g transform="translate(20, 20)">
+      <g transform="translate(30, 30)">
+        <g transform="translate(40, 40)">
+          <g transform="translate(50, 50)">
+            <rect x="0" y="0" width="100" height="100" fill="url(#grad1)"/>
+            <circle cx="50" cy="50" r="30" fill="url(#grad2)" filter="url(#blur1)"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <path d="M 10 10 L 20 20 C 30 30 40 40 50 50 S 60 60 70 70 Q 80 80 90 90 T 100 100 A 10 10 0 0 1 110 110 Z M 120 120 L 130 130 C 140 140 150 150 160 160 S 170 170 180 180 Q 190 190 200 200 T 210 210 A 20 20 0 0 1 220 220 Z" fill="red"/>
+  <path d="M 0 0 L 100 0 L 100 100 L 0 100 Z M 10 10 L 90 10 L 90 90 L 10 90 Z M 20 20 L 80 20 L 80 80 L 20 80 Z" fill="green"/>
+  <path d="M 50 0 C 60 10 70 20 80 30 S 90 40 100 50 C 110 60 120 70 130 80 S 140 90 150 100 L 200 200 Q 210 210 220 220 T 230 230 A 30 30 0 1 0 240 240 Z" fill="blue"/>
+  <path d="M 0 0 L 10 0 L 10 10 L 0 10 Z M 20 0 L 30 0 L 30 10 L 20 10 Z M 40 0 L 50 0 L 50 10 L 40 10 Z M 60 0 L 70 0 L 70 10 L 60 10 Z M 80 0 L 90 0 L 90 10 L 80 10 Z" fill="purple"/>
+  <path d="M 100 200 C 110 210 120 220 130 230 C 140 240 150 250 160 260 L 170 270 L 180 280 C 190 290 200 300 210 310 Q 220 320 230 330 Q 240 340 250 350 T 260 360 T 270 370 A 40 40 0 0 1 280 380 Z" fill="orange"/>
+  <path d="M 0 300 L 50 300 L 50 350 L 0 350 Z M 60 300 L 110 300 L 110 350 L 60 350 Z M 120 300 L 170 300 L 170 350 L 120 350 Z M 180 300 L 230 300 L 230 350 L 180 350 Z" fill="cyan"/>
+  <path d="M 300 0 Q 310 10 320 20 Q 330 30 340 40 Q 350 50 360 60 C 370 70 380 80 390 90 C 400 100 410 110 420 120 L 430 130 L 440 140 L 450 150 L 460 160 L 470 170 Z" fill="magenta"/>
+  <path d="M 500 0 C 510 10 520 20 530 30 S 540 40 550 50 S 560 60 570 70 S 580 80 590 90 L 600 100 L 610 110 L 620 120 L 630 130 Z" fill="brown"/>
+  <rect x="400" y="400" width="50" height="50" fill="yellow" clip-path="url(#clip1)"/>
+  <rect x="460" y="400" width="50" height="50" fill="lime" filter="url(#shadow)"/>
+  <circle cx="600" cy="400" r="25" fill="pink"/>
+  <circle cx="660" cy="400" r="25" fill="teal"/>
+  <ellipse cx="400" cy="500" rx="40" ry="20" fill="navy"/>
+  <line x1="500" y1="500" x2="600" y2="500" stroke="black" stroke-width="2"/>
+  <polygon points="650,500 700,550 600,550" fill="maroon"/>
+  <polyline points="100,500 150,450 200,500 250,450 300,500" stroke="gray" fill="none"/>
+  <text x="10" y="590" font-size="14" fill="black">Complex SVG</text>
+</svg>
