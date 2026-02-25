@@ -41,6 +41,9 @@ jobs:
       - name: Push database schema
         run: pnpm --filter @svg-spawn/web db:push
 
+      - name: Build
+        run: pnpm build
+
       - name: Type check
         run: pnpm type-check
 
@@ -49,9 +52,6 @@ jobs:
 
       - name: Unit tests
         run: pnpm test
-
-      - name: Build
-        run: pnpm build
 
   e2e:
     runs-on: ubuntu-latest
