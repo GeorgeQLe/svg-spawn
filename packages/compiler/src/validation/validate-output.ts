@@ -23,8 +23,6 @@ export function validateOutput(svgString: string): Result<void, ValidationError>
   // Basic well-formedness: check that open tags are closed
   // This is a simplified check - not a full XML parser
   const selfClosingRegex = /<([a-zA-Z][a-zA-Z0-9]*)[^>]*\/>/g;
-  const openTagRegex = /<([a-zA-Z][a-zA-Z0-9]*)[^>]*(?<!\/)>/g;
-  const closeTagRegex = /<\/([a-zA-Z][a-zA-Z0-9]*)>/g;
 
   const selfClosing = new Set<string>();
   let match: RegExpExecArray | null;

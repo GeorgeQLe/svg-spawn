@@ -33,18 +33,6 @@ function hasElement(root: SvgElement, tagName: string): boolean {
   return findElement(root, tagName) !== undefined;
 }
 
-/**
- * Helper to find all elements with a given tag name.
- */
-function findAllElements(root: SvgElement, tagName: string): SvgElement[] {
-  const results: SvgElement[] = [];
-  if (root.tagName === tagName) results.push(root);
-  for (const child of root.children) {
-    results.push(...findAllElements(child, tagName));
-  }
-  return results;
-}
-
 describe('sanitize', () => {
   it('strips <script> elements', () => {
     const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">

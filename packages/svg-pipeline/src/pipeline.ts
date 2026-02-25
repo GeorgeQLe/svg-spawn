@@ -3,7 +3,7 @@ import type {
   SvgStructuredSummary,
   ComplexityScore,
 } from '@svg-spawn/core';
-import { type Result, ok, err, COMPLEXITY_THRESHOLDS } from '@svg-spawn/core';
+import { type Result, ok, COMPLEXITY_THRESHOLDS } from '@svg-spawn/core';
 import { type ParseError, type SanitizationError, type ComplexityExceeded } from './errors.js';
 import { parseSvg } from './parser/parse-svg.js';
 import { sanitize } from './sanitize/sanitize.js';

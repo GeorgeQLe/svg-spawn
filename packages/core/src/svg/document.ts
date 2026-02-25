@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SvgElementSchema, type SvgElement } from './element.js';
+import { SvgElementSchema } from './element.js';
 
 export const ViewBoxSchema = z.object({
   minX: z.number(),
