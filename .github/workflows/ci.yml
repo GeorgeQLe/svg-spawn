@@ -9,6 +9,22 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: svgspawn
+          POSTGRES_USER: svgspawn
+          POSTGRES_PASSWORD: svgspawn
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U svgspawn -d svgspawn"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://svgspawn:svgspawn@localhost:5432/svgspawn
     steps:
       - uses: actions/checkout@v4
 
@@ -21,6 +37,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Push database schema
+        run: pnpm --filter @svg-spawn/web db:push
 
       - name: Type check
         run: pnpm type-check

@@ -16,7 +16,7 @@ AI-powered SVG animation tool. Upload an SVG, describe the animation you want in
 | 6 | Frontend UI (Linear Mode + Graph View) | Done |
 | 7 | Backend API, Job System & Integration | Done |
 
-**Test coverage:** 277 unit tests (Vitest) + 22 E2E tests (Playwright) = 299 total, all passing.
+**Test coverage:** 315 unit tests (Vitest) + 22 E2E tests (Playwright) = 337 total, all passing.
 
 ## Architecture
 
@@ -52,8 +52,11 @@ svg-spawn/
 - **Validation:** Zod
 - **AI:** Google Gemini (with mock client for testing)
 - **SVG Parsing:** fast-xml-parser
+- **Database:** PostgreSQL 16, Drizzle ORM (with in-memory fallback for dev)
+- **Auth:** better-auth (Google + GitHub OAuth)
 - **Testing:** Vitest (unit), Playwright (E2E)
 - **Build:** Turborepo
+- **Infra:** Docker Compose (local Postgres), Terraform (AWS dev)
 
 ## Getting Started
 
@@ -61,6 +64,7 @@ svg-spawn/
 
 - Node.js >= 20
 - pnpm >= 10
+- Docker (optional, for local PostgreSQL)
 
 ### Setup
 
@@ -68,10 +72,24 @@ svg-spawn/
 # Install dependencies
 pnpm install
 
-# Run the dev server
+# Run the dev server (works without a database — uses in-memory store)
 pnpm dev
 
 # Open http://localhost:3000
+```
+
+### With PostgreSQL (optional)
+
+```bash
+# Start local Postgres via Docker Compose
+docker compose up -d
+
+# Push the database schema
+DATABASE_URL=postgresql://svgspawn:svgspawn@localhost:5433/svgspawn \
+  pnpm --filter @svg-spawn/web db:push
+
+# Run dev server with persistence + auth
+DATABASE_URL=postgresql://svgspawn:svgspawn@localhost:5433/svgspawn pnpm dev
 ```
 
 ### Environment Variables
@@ -87,8 +105,9 @@ cp apps/web/.env.example apps/web/.env.local
 | `GEMINI_API_KEY` | — | Google Gemini API key (optional, falls back to mock) |
 | `GEMINI_MODEL_ID` | `gemini-2.5-pro` | Gemini model to use |
 | `MAX_CREDITS_FREE` | `50` | Free tier generation limit per workspace |
+| `DATABASE_URL` | — | PostgreSQL connection string (enables persistence + auth) |
 
-The app works without a Gemini API key — it falls back to mock generation for development.
+The app works without any env vars — it falls back to mock AI generation and in-memory storage for development.
 
 ## Development
 
@@ -114,9 +133,11 @@ pnpm format
 | `@svg-spawn/svg-pipeline` | 33 |
 | `@svg-spawn/compiler` | 71 |
 | `@svg-spawn/ai-client` | 35 |
-| `@svg-spawn/web` | 39 |
+| `@svg-spawn/web` | 77 |
 | E2E (Playwright) | 22 |
-| **Total** | **299** |
+| **Total** | **337** |
+
+The web tests include 38 API route handler tests covering all 7 endpoints (auth, validation, success paths, error cases).
 
 ## Key Features (MVP)
 
@@ -135,8 +156,6 @@ pnpm format
 
 These are defined in the full spec (`spec.md`) but not yet built:
 
-- Persistent database (currently in-memory)
-- Authentication (Clerk/NextAuth)
 - Real-time SSE for job progress
 - Morph animation mode (before/after SVG transitions)
 - Element picker / fine-grained targeting
