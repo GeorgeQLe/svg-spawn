@@ -51,7 +51,7 @@ jobs:
         run: pnpm lint
 
       - name: Unit tests
-        run: pnpm test
+        run: pnpm turbo run test --filter='!e2e'
 
   e2e:
     runs-on: ubuntu-latest
